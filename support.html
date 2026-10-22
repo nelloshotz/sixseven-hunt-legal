@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SixSeven Hunt · Support</title>
+<style>
+  :root { --night:#0B0B12; --graphite:#1A1A26; --line:#2A2A3A; --violet:#7B2CFF; --acid:#E6FF00; --shock:#FF2E88; --white:#FFFFFF; --lav:#B9B9CC; --green:#2BE07A; --red:#FF4D4D; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--night); color:var(--white); font:17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:32px 20px 64px; }
+  h1 { font-size:36px; line-height:1.1; margin:0; }
+  .tag { display:inline-block; background:var(--acid); color:var(--night); font-weight:800; font-size:13px; padding:4px 10px; border:2px solid var(--night); border-radius:8px; transform:rotate(-3deg); box-shadow:3px 3px 0 var(--shock); margin-bottom:14px; }
+  p { color:var(--lav); }
+  form { background:var(--graphite); border:2px solid var(--white); border-radius:20px; padding:20px; box-shadow:6px 6px 0 var(--violet); margin-top:24px; }
+  label { display:block; font-weight:700; font-size:14px; margin:14px 0 6px; }
+  input, select, textarea { width:100%; font:inherit; color:var(--white); background:var(--night); border:2px solid var(--line); border-radius:12px; padding:12px; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--acid); }
+  textarea { min-height:150px; resize:vertical; }
+  .hp { position:absolute; left:-9999px; }
+  button { margin-top:20px; width:100%; min-height:56px; font:inherit; font-weight:800; color:var(--white); background:linear-gradient(135deg, var(--violet), var(--shock)); border:2px solid var(--night); border-radius:28px; box-shadow:4px 4px 0 var(--acid); cursor:pointer; }
+  button:disabled { opacity:.5; }
+  .msg { margin-top:16px; font-weight:700; }
+  .ok { color:var(--green); } .err { color:var(--red); }
+  .faq { margin-top:36px; } .faq h2 { color:var(--acid); font-size:22px; } .faq h3 { font-size:17px; margin:18px 0 4px; }
+  a { color:var(--acid); }
+  footer { margin-top:40px; font-size:14px; color:#8A8AA0; }
+</style>
+</head>
+<body>
+<main>
+  <span class="tag">SUPPORT</span>
+  <h1>SixSeven Hunt</h1>
+  <p>Questions, problems with an account or a purchase, or a bug? Write to us and we'll get back to you by email, usually within 2 working days.</p>
+
+  <form id="f" novalidate>
+    <label for="name">Name</label>
+    <input id="name" name="name" maxlength="80" autocomplete="name" required>
+    <label for="email">Email (for our reply)</label>
+    <input id="email" name="email" type="email" maxlength="120" autocomplete="email" required>
+    <label for="username">SixSeven Hunt username (optional)</label>
+    <input id="username" name="username" maxlength="30" autocomplete="off">
+    <label for="topic">Topic</label>
+    <select id="topic" name="topic">
+      <option value="question">General question</option>
+      <option value="account">My account</option>
+      <option value="purchase">A purchase</option>
+      <option value="privacy">Privacy or data deletion</option>
+      <option value="bug">Something isn't working</option>
+      <option value="other">Other</option>
+    </select>
+    <label for="message">Message</label>
+    <textarea id="message" name="message" maxlength="4000" required></textarea>
+    <div class="hp" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+    <button id="send" type="submit">Send message</button>
+    <div id="status" class="msg" role="status" aria-live="polite"></div>
+  </form>
+
+  <section class="faq">
+    <h2>Quick answers</h2>
+    <h3>How do I delete my account?</h3>
+    <p>In the app: Profile → Delete account. All your data is erased within 30 days.</p>
+    <h3>I bought something but didn't get it</h3>
+    <p>Open the Shop and tap "Restore purchases". If it's still missing, write to us with the date of the purchase.</p>
+    <h3>How do I get a refund?</h3>
+    <p>Refunds are handled by Apple at <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>. What the purchase gave you (showcase, completed challenge, saved streak) is removed after the refund.</p>
+    <h3>Why was my photo rejected?</h3>
+    <p>Only photos taken live in the app count. Screenshots, photos of a screen, images from the web, or the same 67 photographed twice are rejected.</p>
+  </section>
+
+  <footer>
+    <a href="privacy.html">Privacy policy</a> · <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Terms of use (EULA)</a>
+  </footer>
+</main>
+<script>
+const f = document.getElementById("f"), status = document.getElementById("status"), send = document.getElementById("send");
+f.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(f).entries());
+  data.language = navigator.language || "";
+  status.className = "msg"; status.textContent = "";
+  if (!data.name.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email) || data.message.trim().length < 5) {
+    status.className = "msg err"; status.textContent = "Please fill in your name, a valid email and a message."; return;
+  }
+  send.disabled = true; send.textContent = "Sending…";
+  try {
+    const r = await fetch("https://api.sixseven.ctbios.it/functions/v1/support", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
+    });
+    if (r.ok) { f.reset(); status.className = "msg ok"; status.textContent = "Thanks! Your message has been sent. We'll reply by email."; }
+    else if (r.status === 429) { status.className = "msg err"; status.textContent = "Too many messages in a short time. Please try again later."; }
+    else { status.className = "msg err"; status.textContent = "Something went wrong. Please check the fields and try again."; }
+  } catch { status.className = "msg err"; status.textContent = "Can't reach the server right now. Please try again in a moment."; }
+  send.disabled = false; send.textContent = "Send message";
+});
+</script>
+</body>
+</html>
